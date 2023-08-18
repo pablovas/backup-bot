@@ -11,4 +11,4 @@ module.exports = {
   homeDir: '/home/YOUR_USER/',
 };
 ```
-With the config file, now you can run this project typing `sh start.sh` in the terminal.
+With the config file, run `npm install` so now you can run this project typing `sh start.sh` in the terminal.

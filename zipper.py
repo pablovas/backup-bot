@@ -1,44 +1,32 @@
 import os
 import zipfile
-from datetime import datetime
-import config
 
-def zip_folder(folder_paths, output_path):
-    for folder_path in folder_paths:
-        total_files = 0
-        for root, dirs, files in os.walk(folder_path):
-            if os.path.basename(root) in ['Capturas de tela', 'Telegram Desktop']:
-                continue
-            dirs[:] = [d for d in dirs if not d.startswith('.')]
-            for file in files:
-                file_path = os.path.join(root, file)
-                if os.path.basename(file_path).startswith('backup-') and file_path.endswith('.zip'):
-                    continue
-                total_files += 1
-
-        with zipfile.ZipFile(output_path.format(folder=os.path.basename(folder_path)), 'w', zipfile.ZIP_DEFLATED) as zipf:
-            print(f"Creating zip file: {output_path.format(folder=os.path.basename(folder_path))}")
-            print(f"Total files to be zipped: {total_files}")
-            
-            progress_count = 0
-            for root, dirs, files in os.walk(folder_path):
-                if os.path.basename(root) in config.exceptions:
-                    continue
-                dirs[:] = [d for d in dirs if not d.startswith('.')]
+def zip_folders(selected_folders, zip_filename):
+    with zipfile.ZipFile(zip_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for folder in selected_folders:
+            for root, _, files in os.walk(folder):
                 for file in files:
                     file_path = os.path.join(root, file)
-                    if os.path.basename(file_path).startswith('backup-') and file_path.endswith('.zip'):
-                        continue
-                    arcname = os.path.join(os.path.basename(folder_path), os.path.relpath(file_path, folder_path))
-                    zipf.write(file_path, arcname=arcname)
-                    
-                    progress_count += 1
-                    print(f"Progress: {progress_count}/{total_files} files zipped")
-                    print(f"Zipping file: {file_path}")
+                    arcname = os.path.relpath(file_path, os.path.dirname(folder))
+                    zipf.write(file_path, arcname)
 
-current_date = datetime.now().strftime('%Y-%m-%d')
+def main():
+    selected_folders = []
+    while True:
+        folder = input("Digite o caminho da pasta a ser zipada (ou 'sair' para encerrar): ")
+        if folder.lower() == 'sair':
+            break
+        if os.path.exists(folder) and os.path.isdir(folder):
+            selected_folders.append(folder)
+        else:
+            print("Caminho inválido ou pasta não encontrada. Tente novamente.")
 
-folders_to_zip = config.backup_files
-output_zip = config.final_zip + current_date + '.zip'
+    if selected_folders:
+        zip_filename = os.path.expanduser('~/selected_folders.zip')
+        zip_folders(selected_folders, zip_filename)
+        print(f"Pastas zipadas com sucesso! Arquivo ZIP salvo em: {zip_filename}")
+    else:
+        print("Nenhuma pasta selecionada. Encerrando.")
 
-zip_folder(folders_to_zip, output_zip)
+if __name__ == "__main__":
+    main()

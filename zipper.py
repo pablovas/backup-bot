@@ -1,5 +1,6 @@
 import os
 import zipfile
+import datetime
 
 def zip_folders(selected_folders, zip_filename):
     with zipfile.ZipFile(zip_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
@@ -22,7 +23,8 @@ def main():
             print("Caminho inválido ou pasta não encontrada. Tente novamente.")
 
     if selected_folders:
-        zip_filename = os.path.expanduser('~/selected_folders.zip')
+        timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        zip_filename = os.path.expanduser(f'~/backup-{timestamp}.zip')
         zip_folders(selected_folders, zip_filename)
         print(f"Pastas zipadas com sucesso! Arquivo ZIP salvo em: {zip_filename}")
     else:
